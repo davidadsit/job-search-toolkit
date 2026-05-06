@@ -75,6 +75,33 @@ if [[ "$generated" -eq 0 ]]; then
   exit 1
 fi
 
+# Strip pandoc/WeasyPrint metadata to avoid ATS spam flags
+python3 - "$folder" <<'PYEOF'
+import sys, os
+from pypdf import PdfReader, PdfWriter
+
+folder = sys.argv[1]
+for fname in os.listdir(folder):
+    if not fname.endswith(".pdf"):
+        continue
+    path = os.path.join(folder, fname)
+    reader = PdfReader(path)
+    writer = PdfWriter()
+    for page in reader.pages:
+        writer.add_page(page)
+    applicant_name = fname.split(" - ")[0]
+    writer.add_metadata({
+        "/Creator": "",
+        "/Producer": "",
+        "/Author": applicant_name,
+        "/Title": os.path.splitext(fname)[0],
+    })
+    tmp = path + ".tmp"
+    with open(tmp, "wb") as f:
+        writer.write(f)
+    os.replace(tmp, path)
+PYEOF
+
 echo ""
 echo "Page counts:"
 for pdf in "$folder"/*.pdf; do

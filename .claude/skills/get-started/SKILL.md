@@ -114,7 +114,19 @@ Do not ask one question at a time. Ask the full batch in a single message.
 > 5. What are your work environment must-haves? (things you need to thrive)
 > 6. What are your work environment must-nots? (things that will make you miserable or ineffective)"
 
-### Batch F: Methodology, Voice, and Formatting (Optional)
+### Batch F: Personality Profiles and Working Style (Optional)
+
+> "These are optional but genuinely useful -- they help generate more authentic interview talking points and self-awareness responses. Skip anything you haven't done or don't want to include.
+>
+> 1. Have you taken any personality or work-style assessments? If so, what were the results? (e.g., Myers-Briggs type, Gallup Top 5 strengths, Working Genius types, DiSC profile, Big Five traits)
+> 2. How do you prefer to handle conflict at work? (e.g., direct 1:1 conversations only, avoid back-channel)
+> 3. What do you need from a CEO or direct manager to do your best work? (e.g., clear vision, autonomy, direct feedback on deficits)
+> 4. What reliably frustrates you or gets in your way? (e.g., lack of progress, unclear direction, responsibility without authority)
+> 5. Any self-aware weaknesses or blindspots you want on record? (e.g., tendencies that have caused issues before)"
+
+If the user skips this batch or any individual question, note "Not specified" and move on.
+
+### Batch G: Methodology, Voice, and Formatting (Optional)
 
 > "Three optional topics -- skip any you don't have strong preferences on.
 >

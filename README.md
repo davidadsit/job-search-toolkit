@@ -15,7 +15,7 @@ Your base documents (resume, cover letter, preferences) live in `Inputs/` and ar
 
 ```bash
 brew install pandoc
-pip install weasyprint
+pip install weasyprint pypdf
 ```
 
 ### 2. Create your personal repo
@@ -130,6 +130,6 @@ Both scripts use pandoc with weasyprint and shared CSS from `.claude/skills/gene
 ## Requirements
 
 - [Claude Code](https://claude.ai/claude-code)
-- [pandoc](https://pandoc.org/) with [weasyprint](https://weasyprint.org/)
+- [pandoc](https://pandoc.org/) with [weasyprint](https://weasyprint.org/) and [pypdf](https://pypdf.readthedocs.io/)
 
-PDF generation uses `mdls` for page count reporting, which requires macOS. The markdown-to-PDF conversion works on any platform.
+PDF generation uses `mdls` for page count reporting, which requires macOS. The markdown-to-PDF conversion works on any platform. `pypdf` is used to strip pandoc/WeasyPrint metadata from generated PDFs to avoid ATS spam flags.

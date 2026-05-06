@@ -59,6 +59,24 @@ Your criteria for evaluating job opportunities. These preferences inform `/find-
 
 - [Your preferred engineering practices and why]
 
+## Personality Profiles
+
+- **Myers-Briggs:** [e.g., ENTJ, INTJ, ENFP -- type and archetype name]
+- **Gallup Top 5:** [Your top five CliftonStrengths]
+- **Working Genius:** [Your two Working Genius types and overall pattern]
+- **DiSC:** [Your DiSC profile and descriptors]
+- **Big Five:** [Any Big Five scores or descriptors worth capturing]
+- **Other:** [Any other assessment results -- Enneagram, MBTI variants, etc.]
+
+## Working Style
+
+- **Conflict resolution:** [How you prefer to handle conflict -- e.g., direct conversations only, no back-channel]
+- **Needs from manager/CEO:** [What you need to do your best work -- e.g., clear vision, direct feedback, autonomy over your domain]
+- **Frustration triggers:** [What reliably derails you -- e.g., lack of progress, unclear direction, responsibility without authority]
+- **AI stance:** [Your view on AI tooling in engineering -- both internal adoption and product application]
+- **Self-aware strengths:** [Things you're genuinely good at that aren't obvious from the resume alone]
+- **Self-aware weaknesses:** [Known blindspots or growth areas you want to be honest about]
+
 ## Candidate Voice
 
 - **Tone:** [e.g., Direct and confident, warm but professional, conversational]

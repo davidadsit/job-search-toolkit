@@ -41,6 +41,8 @@ Before doing any work, check `Lead Tracker.md` for the company name:
 
 Before customizing any documents, research the target company to inform all subsequent phases.
 
+**Web request strategy:** Use WebFetch by default for all research requests. Fall back to Playwright (`browser_navigate` then `browser_snapshot`) only if WebFetch returns a login redirect, an empty body, or fewer than ~200 characters of useful content. Playwright runs headless -- no visible browser window.
+
 #### Step 1: Identify the company
 
 Extract the company name, website, and identifying details from the job posting. Handle three cases:
@@ -172,7 +174,10 @@ Mark any section where data was not found as "No data found" rather than omittin
    - `Inputs/Cover Letter.md`
    - `Inputs/Experience Bank.md` (if it exists; skip without error if not)
 
-   After reading `Inputs/Preferences.md`, extract the **Candidate Voice** section (if present) and keep it as a standing reference for all document generation in Phase 4. It defines the tone, style, vocabulary choices, and things to actively avoid in every generated document.
+   After reading `Inputs/Preferences.md`, extract and hold three sections as standing references for Phase 4:
+   - **Candidate Voice** (if present): tone, style, vocabulary, and things to avoid in every generated document
+   - **Personality Profiles** (if present): assessment results (Myers-Briggs, Gallup, DiSC, etc.) that inform authentic self-awareness language in interview talking points
+   - **Working Style** (if present): conflict resolution approach, needs from manager/CEO, frustration triggers, and self-aware weaknesses -- use these to write more honest and specific interview talking points and cover letter framing
 
 4. **Read the Company Profile** created in Phase 1 (`Applications/CompanyName/Company Profile - CompanyName.md`) to inform gap analysis and output tailoring.
 
@@ -219,14 +224,16 @@ Create all files in `Applications/CompanyName/`. Name resume and cover letter fi
 - For any genuine remaining gaps, honestly acknowledge them in the cover letter. Frame each gap with transferable skills and a concrete plan to bridge it. Never omit or hide gaps.
 - Reference specific company details from the Company Profile (funding stage, product, mission) to demonstrate genuine research and interest. Weave them into the narrative naturally; do not simply list facts.
 - Apply the **Candidate Voice** from `Inputs/Preferences.md`: match the specified tone, follow the style guidelines, and avoid anything listed under "Avoid." This takes precedence over the base cover letter's existing style -- if the base letter deviates from Preferences.md voice, correct toward Preferences.md.
+- If the candidate's most recent role ended in a way that might raise questions (e.g., company contraction, org restructure, unusual tenure length, or a departure that doesn't speak for itself), include a brief "Why I left [Company]" paragraph. Keep it 2-3 sentences: what was accomplished, why it was the right time to move on, and that it ended well. Proactively addressing a potentially confusing departure builds trust. If the departure is straightforward and self-evident, omit this.
 - Do NOT use em dashes. Use other punctuation instead.
 - **ATS keyword reinforcement:** Many ATS platforms parse and score cover letters alongside resumes. Reinforce the top 5-7 required keywords from the keyword inventory using the JD's exact terms. Do not treat the cover letter as a second keyword-stuffing opportunity; it should remain a persuasive narrative.
 
 #### 3. `Interview Talking Points - CompanyName.md`
 - **Strengths to emphasize:** Where the candidate's experience directly matches key requirements
-- **Gap responses:** For each gap or partial match, provide a clear talking point that frames transferable skills, shows self-awareness, and describes a concrete plan to close the gap
+- **Gap responses:** For each gap or partial match, provide a clear talking point that frames transferable skills, shows self-awareness, and describes a concrete plan to close the gap. If **Working Style** is present in Preferences.md, use the self-aware weaknesses and frustration triggers to add specificity and honesty to gap responses.
+- **Leadership style:** Use **Personality Profiles** (if present) to write an authentic "how I lead" narrative. Don't quote assessment labels directly in interview answers -- translate them into concrete behaviors. Use **Working Style** (conflict resolution, needs from manager) to prepare for questions about team dynamics and what you need to thrive.
 - **Company-specific points:** Draw from the Company Profile for specific data points: funding, leadership backgrounds, recent news, technical challenges.
-- **Questions to ask:** Thoughtful questions the candidate can ask the interviewer, tailored to this role and company. Use Research Gaps from the Company Profile to generate questions about things not found through research.
+- **Questions to ask:** Thoughtful questions the candidate can ask the interviewer, tailored to this role and company. Use Research Gaps from the Company Profile to generate questions about things not found through research. Use the **Working Style** "needs from manager/CEO" field to generate questions that screen for the candidate's own requirements.
 
 ### Phase 4.5: ATS Keyword Verification
 
@@ -262,7 +269,7 @@ Add or update this lead in `Lead Tracker.md`:
 
 1. Read `Lead Tracker.md` (if it exists). If it does not exist, create it using the template format from `/find-jobs`.
 2. Check if this company + role already appears in the tracker.
-   - **If found:** Update its status to "Researching - customized materials generated" and add the application folder path.
+   - **If found:** Update its status to "Researching - customized materials generated" and add the application folder path. If the existing entry already has a more advanced status (e.g., "Applied", "Interviewing", "On Pause"), preserve that status and only update the application folder path and notes.
    - **If not found:** Add a new entry in the **Researching** section with source, discovered date (today), stage, URL, status "Researching - customized materials generated", application folder path, and relevant notes.
 3. Update the **Pipeline Summary** counts to reflect the change.
 

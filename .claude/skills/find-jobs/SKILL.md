@@ -26,6 +26,16 @@ Key filters to apply when searching (drawn from Preferences.md):
 - Location and remote preferences
 - Compensation minimum and target
 
+## Web Request Strategy
+
+Always prefer WebFetch over Playwright -- it is faster, cheaper, and runs silently.
+
+- **Default:** Use WebFetch for all job board and career page requests.
+- **Known JS-required sites:** Use Playwright directly (skip the WebFetch attempt) for sites confirmed to need JavaScript:
+  - **linkedin.com** -- returns a login redirect without JavaScript
+- **Fallback trigger:** If WebFetch returns a login redirect, an empty body, or fewer than ~200 characters of useful content, retry with Playwright (`browser_navigate` then `browser_snapshot`).
+- **Playwright tooling:** `browser_navigate` to load the URL, `browser_snapshot` to extract structured page content. Fall back to `browser_take_screenshot` only if snapshot is insufficient.
+
 ## Process
 
 ### Step 1: Read existing data
@@ -83,11 +93,14 @@ The examples below are Utah-focused; replace with VCs relevant to your metro are
 
 ### Step 3: Check Company Pipeline
 
-For each company listed under **Active Targets** in `Company Pipeline.md`:
+`Company Pipeline.md` may have two sections: **Active Targets** (companies actively being monitored for openings) and **Watching** (companies of lower priority to track over time).
 
+**Active Targets:** For each company listed:
 1. Run a WebSearch: `site:[career-page-domain] "engineering" OR "CTO" OR "VP"` (or WebFetch the career page URL directly if it looks like a static careers page)
 2. Note any relevant openings found
 3. Update the "Last Checked" date for that company in `Company Pipeline.md`
+
+**Watching:** Do not run dedicated searches for Watching companies. If a Watching company happens to appear in the Step 2 job board results, flag it with a note that it's in the Watching list. No other action needed.
 
 Skip this step if `Company Pipeline.md` does not exist or has no Active Targets.
 

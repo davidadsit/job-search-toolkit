@@ -29,6 +29,35 @@ pandoc "Inputs/Cover Letter.md" \
   -o "Documents/$APPLICANT_NAME - Cover Letter.pdf" \
   2>/dev/null
 
+# Strip pandoc/WeasyPrint metadata to avoid ATS spam flags
+python3 - "$APPLICANT_NAME" <<'PYEOF'
+import sys, os
+from pypdf import PdfReader, PdfWriter
+
+name = sys.argv[1]
+files = [
+    f"Documents/{name} - Resume.pdf",
+    f"Documents/{name} - Cover Letter.pdf",
+]
+for path in files:
+    if not os.path.exists(path):
+        continue
+    reader = PdfReader(path)
+    writer = PdfWriter()
+    for page in reader.pages:
+        writer.add_page(page)
+    writer.add_metadata({
+        "/Creator": "",
+        "/Producer": "",
+        "/Author": name,
+        "/Title": os.path.splitext(os.path.basename(path))[0],
+    })
+    tmp = path + ".tmp"
+    with open(tmp, "wb") as f:
+        writer.write(f)
+    os.replace(tmp, path)
+PYEOF
+
 echo ""
 echo "Page counts:"
 for pdf in "Documents/$APPLICANT_NAME - Resume.pdf" "Documents/$APPLICANT_NAME - Cover Letter.pdf"; do
