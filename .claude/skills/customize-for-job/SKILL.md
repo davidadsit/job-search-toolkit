@@ -30,10 +30,10 @@ Create the `Applications/CompanyName/` directory as needed. This file serves as 
 
 ### Phase 0: Lead Tracker Check
 
-Before doing any work, check `Lead Tracker.md` for the company name:
+Before doing any work, check `lead-tracker.md` and `closed-leads-archive.md` for the company name:
 
-1. Read `Lead Tracker.md` and search for the company name.
-2. **If found in Closed Leads:** Stop immediately. Tell the user the company was previously evaluated and closed, include the closure reason, and ask if they want to proceed anyway.
+1. Read `lead-tracker.md` (active leads) and `closed-leads-archive.md` (past closures) and search both for the company name.
+2. **If found in `closed-leads-archive.md`:** Stop immediately. Tell the user the company was previously evaluated and closed, include the closure reason, and ask if they want to proceed anyway.
 3. **If found in Active Leads:** Note the existing status and proceed, updating the existing entry rather than creating a duplicate.
 4. **If not found:** Proceed to Phase 1.
 
@@ -41,7 +41,7 @@ Before doing any work, check `Lead Tracker.md` for the company name:
 
 Before customizing any documents, research the target company to inform all subsequent phases.
 
-**Web request strategy:** Use WebFetch by default for all research requests. Fall back to Playwright (`browser_navigate` then `browser_snapshot`) only if WebFetch returns a login redirect, an empty body, or fewer than ~200 characters of useful content. Playwright runs headless -- no visible browser window.
+**Web request strategy:** Use WebFetch by default for all research requests. Fall back to `node Scripts/fetch-rendered.mjs <url>` only if WebFetch returns a login redirect, an empty body, or fewer than ~200 characters of useful content. The CLI runs headless and exits cleanly per invocation.
 
 #### Step 1: Identify the company
 
@@ -74,7 +74,7 @@ Use `WebSearch` to find:
 
 Extract: total funding, last round details (amount, date, investors), estimated valuation if available, employee count, growth signals.
 
-5. Compensation data: search `[CompanyName] [RoleTitle] salary` and `[RoleTitle] salary [Industry] [Stage]`. Check the job posting itself for any listed salary range. Note whether the posted range aligns with your target compensation from `Inputs/Preferences.md`.
+5. Compensation data: search `[CompanyName] [RoleTitle] salary` and `[RoleTitle] salary [Industry] [Stage]`. Check the job posting itself for any listed salary range. Note whether the posted range aligns with your target compensation from `Inputs/preferences.md`.
 
 #### Step 4: Research leadership team
 
@@ -89,7 +89,7 @@ Focus on: the person the candidate would report to, and the CEO. Understanding t
 
 #### Step 5: Create Company Profile
 
-Create `Applications/CompanyName/Company Profile - CompanyName.md` with this structure:
+Create `Applications/CompanyName/company-profile.md` with this structure:
 
 ```markdown
 # Company Profile - [CompanyName]
@@ -169,17 +169,16 @@ Mark any section where data was not found as "No data found" rather than omittin
    For each keyword, note whether it appears in a "required" or "preferred" context. This inventory is a working list used in Phases 4, 4.5, and 6.
 
 3. **Read all source documents** (read-only, never modify these):
-   - `Inputs/Preferences.md`
-   - `Inputs/Resume.md`
-   - `Inputs/Cover Letter.md`
-   - `Inputs/Experience Bank.md` (if it exists; skip without error if not)
+   - `Inputs/preferences.md`
+   - `Inputs/resume.md`
+   - `Inputs/cover-letter.md`
+   - `Inputs/experience-bank.md` (if it exists; skip without error if not)
 
-   After reading `Inputs/Preferences.md`, extract and hold three sections as standing references for Phase 4:
-   - **Candidate Voice** (if present): tone, style, vocabulary, and things to avoid in every generated document
-   - **Personality Profiles** (if present): assessment results (Myers-Briggs, Gallup, DiSC, etc.) that inform authentic self-awareness language in interview talking points
-   - **Working Style** (if present): conflict resolution approach, needs from manager/CEO, frustration triggers, and self-aware weaknesses -- use these to write more honest and specific interview talking points and cover letter framing
+   When reading the Experience Bank, focus on the main body (everything above any `## Detail Reservoir` section). The Detail Reservoir holds reference-only depth that rarely matters for an application. During Phase 3 gap analysis, scan the Detail Reservoir only when a specific gap or qualification touches one of its tagged topics; otherwise ignore it.
 
-4. **Read the Company Profile** created in Phase 1 (`Applications/CompanyName/Company Profile - CompanyName.md`) to inform gap analysis and output tailoring.
+   After reading `Inputs/preferences.md`, extract the **Candidate Voice** section (if present) and keep it as a standing reference for all document generation in Phase 4. It defines the tone, style, vocabulary choices, and things to actively avoid in every generated document.
+
+4. **Read the Company Profile** created in Phase 1 (`Applications/CompanyName/company-profile.md`) to inform gap analysis and output tailoring.
 
 ### Phase 3: Gap analysis and inquiry
 
@@ -187,7 +186,7 @@ Mark any section where data was not found as "No data found" rather than omittin
 2. Identify any requirement where the candidate's documented experience does not clearly demonstrate a match.
 3. Present ALL identified gaps as a numbered list and ASK the user about each one. Frame questions specifically, e.g.: "The job requires X. I don't see this covered in your documents. Do you have experience with X, or something closely related?" Never assume the candidate lacks experience just because it is not documented.
 4. **Wait for the user to answer before proceeding.** Do not generate any output files until the user has responded.
-5. After receiving answers, append any new information to `Inputs/Experience Bank.md` (create the file if it does not exist). Use the format described below.
+5. After receiving answers, append any new information to `Inputs/experience-bank.md` (create the file if it does not exist). Use the format described below.
 6. Classify each requirement as:
    - **Fully covered** - candidate has clear, documented experience
    - **Partially covered** - candidate has transferable skills or adjacent experience
@@ -195,9 +194,9 @@ Mark any section where data was not found as "No data found" rather than omittin
 
 ### Phase 4: Create output files
 
-Create all files in `Applications/CompanyName/`. Name resume and cover letter files using the applicant's name from `Inputs/Resume.md` (the H1 heading at the top).
+Create all files in `Applications/CompanyName/`. Use the standard filenames listed below; the recruiter-facing PDFs generated later by `/generate-pdfs` pick up the applicant's name from the H1 of `Inputs/resume.md`.
 
-#### 1. `[FirstName LastName] - Resume - CompanyName.md`
+#### 1. `resume.md`
 - Do NOT fabricate experience or skills the candidate doesn't have
 - Reorder bullets within each role to lead with the most relevant ones for this job
 - Adjust the summary to emphasize the aspects most relevant to this role; apply the Candidate Voice from Preferences.md (tone, style, things to avoid)
@@ -218,22 +217,20 @@ Create all files in `Applications/CompanyName/`. Name resume and cover letter fi
 - Use consistent date formats: `Month Year - Month Year` (e.g., "August 2022 - January 2026"). No abbreviations or formats like "2022-2026."
 - No tables, columns, text boxes, or images.
 
-#### 2. `[FirstName LastName] - Cover Letter - CompanyName.md`
+#### 2. `cover-letter.md`
 - Update the opening to connect the candidate's value prop to this company's specific situation
 - Adjust emphasis to match job priorities
 - For any genuine remaining gaps, honestly acknowledge them in the cover letter. Frame each gap with transferable skills and a concrete plan to bridge it. Never omit or hide gaps.
 - Reference specific company details from the Company Profile (funding stage, product, mission) to demonstrate genuine research and interest. Weave them into the narrative naturally; do not simply list facts.
-- Apply the **Candidate Voice** from `Inputs/Preferences.md`: match the specified tone, follow the style guidelines, and avoid anything listed under "Avoid." This takes precedence over the base cover letter's existing style -- if the base letter deviates from Preferences.md voice, correct toward Preferences.md.
-- If the candidate's most recent role ended in a way that might raise questions (e.g., company contraction, org restructure, unusual tenure length, or a departure that doesn't speak for itself), include a brief "Why I left [Company]" paragraph. Keep it 2-3 sentences: what was accomplished, why it was the right time to move on, and that it ended well. Proactively addressing a potentially confusing departure builds trust. If the departure is straightforward and self-evident, omit this.
+- Apply the **Candidate Voice** from `Inputs/preferences.md`: match the specified tone, follow the style guidelines, and avoid anything listed under "Avoid." This takes precedence over the base cover letter's existing style -- if the base letter deviates from Preferences.md voice, correct toward Preferences.md.
 - Do NOT use em dashes. Use other punctuation instead.
 - **ATS keyword reinforcement:** Many ATS platforms parse and score cover letters alongside resumes. Reinforce the top 5-7 required keywords from the keyword inventory using the JD's exact terms. Do not treat the cover letter as a second keyword-stuffing opportunity; it should remain a persuasive narrative.
 
-#### 3. `Interview Talking Points - CompanyName.md`
+#### 3. `interview-talking-points.md`
 - **Strengths to emphasize:** Where the candidate's experience directly matches key requirements
-- **Gap responses:** For each gap or partial match, provide a clear talking point that frames transferable skills, shows self-awareness, and describes a concrete plan to close the gap. If **Working Style** is present in Preferences.md, use the self-aware weaknesses and frustration triggers to add specificity and honesty to gap responses.
-- **Leadership style:** Use **Personality Profiles** (if present) to write an authentic "how I lead" narrative. Don't quote assessment labels directly in interview answers -- translate them into concrete behaviors. Use **Working Style** (conflict resolution, needs from manager) to prepare for questions about team dynamics and what you need to thrive.
+- **Gap responses:** For each gap or partial match, provide a clear talking point that frames transferable skills, shows self-awareness, and describes a concrete plan to close the gap
 - **Company-specific points:** Draw from the Company Profile for specific data points: funding, leadership backgrounds, recent news, technical challenges.
-- **Questions to ask:** Thoughtful questions the candidate can ask the interviewer, tailored to this role and company. Use Research Gaps from the Company Profile to generate questions about things not found through research. Use the **Working Style** "needs from manager/CEO" field to generate questions that screen for the candidate's own requirements.
+- **Questions to ask:** Thoughtful questions the candidate can ask the interviewer, tailored to this role and company. Use Research Gaps from the Company Profile to generate questions about things not found through research.
 
 ### Phase 4.5: ATS Keyword Verification
 
@@ -255,7 +252,7 @@ Before proceeding, review the customized resume against the keyword inventory fr
 
 Now that the gap analysis and customization are complete, revisit the Company Profile to update the "Relevance to Candidate" section with the fuller picture:
 
-1. Re-read `Applications/CompanyName/Company Profile - CompanyName.md`
+1. Re-read `Applications/CompanyName/company-profile.md`
 2. Update the "Relevance to Candidate" section to reflect specifics learned from the gap analysis, Experience Bank answers, and customization work.
 3. **Recommendation** should be one of:
    - **Apply** - strong match for this role
@@ -265,11 +262,11 @@ Now that the gap analysis and customization are complete, revisit the Company Pr
 
 ### Phase 5.5: Update Lead Tracker
 
-Add or update this lead in `Lead Tracker.md`:
+Add or update this lead in `lead-tracker.md`:
 
-1. Read `Lead Tracker.md` (if it exists). If it does not exist, create it using the template format from `/find-jobs`.
+1. Read `lead-tracker.md` (if it exists). If it does not exist, create it using the template format from `/find-jobs`.
 2. Check if this company + role already appears in the tracker.
-   - **If found:** Update its status to "Researching - customized materials generated" and add the application folder path. If the existing entry already has a more advanced status (e.g., "Applied", "Interviewing", "On Pause"), preserve that status and only update the application folder path and notes.
+   - **If found:** Update its status to "Researching - customized materials generated" and add the application folder path.
    - **If not found:** Add a new entry in the **Researching** section with source, discovered date (today), stage, URL, status "Researching - customized materials generated", application folder path, and relevant notes.
 3. Update the **Pipeline Summary** counts to reflect the change.
 
@@ -325,7 +322,7 @@ Accumulated knowledge about your experience, organized by topic.
 - ALWAYS ask about gaps before assuming the candidate lacks experience
 - ALWAYS read the Experience Bank (if it exists) before gap analysis
 - ALWAYS append new information to the Experience Bank after user answers
-- ALWAYS apply the Candidate Voice from `Inputs/Preferences.md` when generating or customizing any document. If the section is absent, infer voice from the base cover letter's existing style.
+- ALWAYS apply the Candidate Voice from `Inputs/preferences.md` when generating or customizing any document. If the section is absent, infer voice from the base cover letter's existing style.
 - The base documents are the source of truth. Only rearrange and emphasize, don't rewrite the core narrative.
 - Always create new files in the Applications subfolder.
 - Keep company research efficient: aim for no more than ~10 WebSearch calls and ~8 WebFetch calls for the entire research phase.

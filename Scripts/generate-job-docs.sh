@@ -29,44 +29,34 @@ fi
 
 generated=0
 
-# Resume -- matches any file ending in "- Resume - *.md"
-resume_md=("$folder"/*\ -\ Resume\ -\ *.md)
-if [[ -f "${resume_md[0]}" ]]; then
-  resume_name="${resume_md[0]}"
-  resume_pdf="${resume_name/- Resume - *.md/- Resume.pdf}"
-  resume_pdf="$folder/$(basename "${resume_md[0]%- Resume - *.md}")- Resume.pdf"
-  # Derive output PDF name from input markdown name
-  base=$(basename "${resume_md[0]}" | sed 's/ - Resume - .*//')
-  resume_pdf="$folder/$base - Resume.pdf"
+# Resume
+if [[ -f "$folder/resume.md" ]]; then
   echo "Generating resume PDF..."
-  pandoc "${resume_md[0]}" \
+  pandoc "$folder/resume.md" \
     -f markdown+hard_line_breaks \
     -t html5 \
     --pdf-engine=weasyprint \
     --css=".claude/skills/generate-pdfs/resume.css" \
-    -o "$resume_pdf" \
+    -o "$folder/Dave Adsit - Resume.pdf" \
     2>/dev/null
   generated=$((generated + 1))
 else
-  echo "Skipping resume: no '* - Resume - *.md' file found in $folder/"
+  echo "Skipping resume: no resume.md found in $folder/"
 fi
 
-# Cover Letter -- matches any file ending in "- Cover Letter - *.md"
-cover_md=("$folder"/*\ -\ Cover\ Letter\ -\ *.md)
-if [[ -f "${cover_md[0]}" ]]; then
-  base=$(basename "${cover_md[0]}" | sed 's/ - Cover Letter - .*//')
-  cover_pdf="$folder/$base - Cover Letter.pdf"
+# Cover Letter
+if [[ -f "$folder/cover-letter.md" ]]; then
   echo "Generating cover letter PDF..."
-  pandoc "${cover_md[0]}" \
+  pandoc "$folder/cover-letter.md" \
     -t html5 \
     --pdf-engine=weasyprint \
     --css=".claude/skills/generate-pdfs/cover-letter.css" \
     --include-before-body=".claude/skills/generate-pdfs/cover-letter-header.html" \
-    -o "$cover_pdf" \
+    -o "$folder/Dave Adsit - Cover Letter.pdf" \
     2>/dev/null
   generated=$((generated + 1))
 else
-  echo "Skipping cover letter: no '* - Cover Letter - *.md' file found in $folder/"
+  echo "Skipping cover letter: no cover-letter.md found in $folder/"
 fi
 
 if [[ "$generated" -eq 0 ]]; then
@@ -81,20 +71,22 @@ import sys, os
 from pypdf import PdfReader, PdfWriter
 
 folder = sys.argv[1]
-for fname in os.listdir(folder):
-    if not fname.endswith(".pdf"):
+files = [
+    os.path.join(folder, "Dave Adsit - Resume.pdf"),
+    os.path.join(folder, "Dave Adsit - Cover Letter.pdf"),
+]
+for path in files:
+    if not os.path.exists(path):
         continue
-    path = os.path.join(folder, fname)
     reader = PdfReader(path)
     writer = PdfWriter()
     for page in reader.pages:
         writer.add_page(page)
-    applicant_name = fname.split(" - ")[0]
     writer.add_metadata({
         "/Creator": "",
         "/Producer": "",
-        "/Author": applicant_name,
-        "/Title": os.path.splitext(fname)[0],
+        "/Author": "Dave Adsit",
+        "/Title": os.path.splitext(os.path.basename(path))[0],
     })
     tmp = path + ".tmp"
     with open(tmp, "wb") as f:
@@ -104,21 +96,14 @@ PYEOF
 
 echo ""
 echo "Page counts:"
-for pdf in "$folder"/*.pdf; do
+for pdf in "$folder/Dave Adsit - Resume.pdf" "$folder/Dave Adsit - Cover Letter.pdf"; do
   [[ -f "$pdf" ]] || continue
-  pages="(null)"
-  for _ in 1 2 3; do
-    pages=$(mdls -name kMDItemNumberOfPages -raw "$pdf")
-    [[ "$pages" != "(null)" ]] && break
-    sleep 1
-  done
+  pages=$(pdfinfo "$pdf" | awk '/^Pages:/ {print $2}')
   echo "  $(basename "$pdf"): $pages page(s)"
-  if [[ "$pages" != "(null)" ]]; then
-    case "$pdf" in
-      *Resume*)  [[ "$pages" -gt 2 ]] && echo "    WARNING: Resume exceeds 2 pages" ;;
-      *Cover*)   [[ "$pages" -gt 1 ]] && echo "    WARNING: Cover letter spills to a second page" ;;
-    esac
-  fi
+  case "$pdf" in
+    *Resume*)  [[ "$pages" -gt 2 ]] && echo "    WARNING: Resume exceeds 2 pages" ;;
+    *Cover*)   [[ "$pages" -gt 1 ]] && echo "    WARNING: Cover letter spills to a second page" ;;
+  esac
 done
 
 echo ""

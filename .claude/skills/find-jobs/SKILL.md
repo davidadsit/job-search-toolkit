@@ -12,11 +12,10 @@ The argument is optional:
 
 - **No argument:** Full broad search across all sources.
 - **A keyword or phrase** (e.g., `fintech`, `remote`, `healthcare`): Appended to each search query to narrow results.
-- **`pipeline`:** Only check career pages of companies in `Company Pipeline.md`. Skip broad search.
 
 ## Target Profile
 
-Read `Inputs/Preferences.md` for the full set of job search preferences including target roles, company criteria, compensation, location, excluded industries, and work environment requirements. Use the criteria there to filter and rank results.
+Read `Inputs/preferences.md` for the full set of job search preferences including target roles, company criteria, compensation, location, excluded industries, and work environment requirements. Use the criteria there to filter and rank results.
 
 Key filters to apply when searching (drawn from Preferences.md):
 - Target titles (e.g., CTO, VP of Engineering, Head of Engineering)
@@ -28,24 +27,23 @@ Key filters to apply when searching (drawn from Preferences.md):
 
 ## Web Request Strategy
 
-Always prefer WebFetch over Playwright -- it is faster, cheaper, and runs silently.
+Always prefer WebFetch over the Playwright CLI -- it is faster, cheaper, and runs silently.
 
 - **Default:** Use WebFetch for all job board and career page requests.
-- **Known JS-required sites:** Use Playwright directly (skip the WebFetch attempt) for sites confirmed to need JavaScript:
+- **Known JS-required sites:** Use the Playwright CLI directly (skip the WebFetch attempt) for sites confirmed to need JavaScript:
   - **linkedin.com** -- returns a login redirect without JavaScript
-- **Fallback trigger:** If WebFetch returns a login redirect, an empty body, or fewer than ~200 characters of useful content, retry with Playwright (`browser_navigate` then `browser_snapshot`).
-- **Playwright tooling:** `browser_navigate` to load the URL, `browser_snapshot` to extract structured page content. Fall back to `browser_take_screenshot` only if snapshot is insufficient.
+- **Fallback trigger:** If WebFetch returns a login redirect, an empty body, or fewer than ~200 characters of useful content, retry with the CLI.
+- **CLI invocation:** `node Scripts/fetch-rendered.mjs "<url>"` returns rendered text on stdout. Add `--selector "<css>"` to wait for a specific element, or `--format html` if structure matters. Each call is one-shot and parallel-safe -- batch independent URLs in a single message.
 
 ## Process
 
 ### Step 1: Read existing data
 
-1. Read `Company Pipeline.md` (if it exists) to get Active Target companies and their career page URLs.
-2. Read `Lead Tracker.md` (if it exists) to identify leads already tracked (used for deduplication).
+Read `lead-tracker.md` (if it exists) to identify leads already tracked. Also read `closed-leads-archive.md` (if it exists) for past closures. Both are used for deduplication.
 
 ### Step 2: Search job boards
 
-Run WebSearch queries across these sources. If a focus keyword was provided, append it to each query. Skip this step if the argument is `pipeline`.
+Run WebSearch queries across these sources. If a focus keyword was provided, append it to each query.
 
 1. **LinkedIn Jobs:** `"VP of Engineering" OR "Head of Engineering" OR "CTO" site:linkedin.com/jobs SaaS`
 2. **Wellfound:** `"VP of Engineering" OR "CTO" site:wellfound.com`
@@ -91,27 +89,14 @@ The examples below are Utah-focused; replace with VCs relevant to your metro are
 - For VCs with only a portfolio page (no job board): WebSearch `"CTO" OR "VP of Engineering" site:[vc-domain]` to find any linked job postings.
 - Note the source VC for each result so you know the company's investor backing.
 
-### Step 3: Check Company Pipeline
-
-`Company Pipeline.md` may have two sections: **Active Targets** (companies actively being monitored for openings) and **Watching** (companies of lower priority to track over time).
-
-**Active Targets:** For each company listed:
-1. Run a WebSearch: `site:[career-page-domain] "engineering" OR "CTO" OR "VP"` (or WebFetch the career page URL directly if it looks like a static careers page)
-2. Note any relevant openings found
-3. Update the "Last Checked" date for that company in `Company Pipeline.md`
-
-**Watching:** Do not run dedicated searches for Watching companies. If a Watching company happens to appear in the Step 2 job board results, flag it with a note that it's in the Watching list. No other action needed.
-
-Skip this step if `Company Pipeline.md` does not exist or has no Active Targets.
-
-### Step 4: Filter and deduplicate
+### Step 3: Filter and deduplicate
 
 1. Remove duplicate results (same company + same role title).
-2. Remove any leads that already appear in `Lead Tracker.md`, including Closed Leads. Do not waste time researching or evaluating companies that have been previously discarded.
+2. Remove any leads that already appear in `lead-tracker.md` or `closed-leads-archive.md` (past closures). Do not waste time researching or evaluating companies that have been previously discarded.
 3. Discard results that are clearly not executive/leadership engineering roles (e.g., "CTO" in a company name but role is an IC position).
 4. Flag but do not discard roles where stage, comp, or location are unknown.
 
-### Step 5: Rank results
+### Step 4: Rank results
 
 Score each result against the target profile in Preferences.md:
 
@@ -119,7 +104,7 @@ Score each result against the target profile in Preferences.md:
 - **Good Match (2):** Most criteria align; one or two are unknown or slightly off
 - **Worth Investigating (1):** Title matches but other criteria are unknown or partially misaligned
 
-### Step 6: Present results
+### Step 5: Present results
 
 Display results grouped by rank:
 
@@ -136,18 +121,15 @@ Display results grouped by rank:
 
 ### Worth Investigating
 ...
-
-### Pipeline Company Check
-- [CompanyName]: [Relevant opening found / No relevant openings / Career page not accessible]
 ```
 
 If no results are found in a category, omit that section. If no results are found at all, say so honestly and suggest alternative approaches (networking, recruiters, adjusting search terms).
 
-### Step 7: User interaction
+### Step 6: User interaction
 
 1. Ask: "Which leads should I add to the Lead Tracker? (Enter numbers, 'all', or 'none')"
-2. For selected leads, append them to the **Discovered** section of `Lead Tracker.md` (create the file from the template if it does not exist).
-3. Update the **Pipeline Summary** counts in `Lead Tracker.md`.
+2. For selected leads, append them to the **Discovered** section of `lead-tracker.md` (create the file from the template if it does not exist).
+3. Update the **Pipeline Summary** counts in `lead-tracker.md`.
 4. Ask: "Want me to run `/customize-for-job` on any of these?"
 
 ## Important Rules

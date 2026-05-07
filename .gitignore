@@ -2,12 +2,12 @@
 **/*.pdf
 Applications/
 Archived/
-Downloaded JDs/
+downloaded-jds/
 Documents/
-Inputs/Resume.md
-Inputs/Cover Letter.md
-Inputs/Experience Bank.md
-Inputs/Preferences.md
-Lead Tracker.md
-Company Pipeline.md
-Podcast Transcripts/
+Inputs/resume.md
+Inputs/cover-letter.md
+Inputs/experience-bank.md
+Inputs/preferences.md
+lead-tracker.md
+company-pipeline.md
+podcast-transcripts/

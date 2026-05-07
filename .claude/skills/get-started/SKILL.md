@@ -8,8 +8,8 @@ Work through the phases in order. Never skip ahead. Never write a file without f
 
 Before collecting any information, read both template files to understand the exact format expected:
 
-1. Read `Inputs/Preferences.template.md`
-2. Read `Inputs/Resume.template.md`
+1. Read `Inputs/preferences.template.md`
+2. Read `Inputs/resume.template.md`
 
 These are the authoritative format references. Every file you write must match these structures exactly.
 
@@ -19,9 +19,9 @@ These are the authoritative format references. Every file you write must match t
 
 Check which setup tasks are already complete:
 
-1. Does `Inputs/Preferences.md` exist?
-2. Does `Inputs/Resume.md` exist?
-3. Does `Inputs/Cover Letter.md` exist?
+1. Does `Inputs/preferences.md` exist?
+2. Does `Inputs/resume.md` exist?
+3. Does `Inputs/cover-letter.md` exist?
 4. Does `.claude/skills/generate-pdfs/cover-letter-header.html` still contain the placeholder text "YOUR NAME"?
 5. Does `Scripts/generate-base-docs.sh` still have `APPLICANT_NAME="Your Name"`?
 
@@ -138,13 +138,13 @@ If the user skips this batch or passes on individual questions, note "No prefere
 
 ### After All Batches: Full Preview
 
-Show the complete draft of `Preferences.md` formatted exactly as it will appear in the file, following the structure of `Inputs/Preferences.template.md`. Ask:
+Show the complete draft of `preferences.md` formatted exactly as it will appear in the file, following the structure of `Inputs/preferences.template.md`. Ask:
 
 > "Here's the full draft of your Preferences.md. Review it carefully -- this file drives filtering in /find-jobs and recommendations in /customize-for-job. Any changes before I write it?"
 
 Wait for explicit approval. Make any requested changes and show the updated draft before writing.
 
-Only write `Inputs/Preferences.md` after receiving explicit approval.
+Only write `Inputs/preferences.md` after receiving explicit approval.
 
 ---
 
@@ -162,7 +162,7 @@ Ask:
 
 ### If the user pastes an existing resume:
 
-Extract the content and reformat it into the structure from `Inputs/Resume.template.md`:
+Extract the content and reformat it into the structure from `Inputs/resume.template.md`:
 
 - H1 heading: their full name (from Phase 1)
 - City and state on the next line
@@ -211,7 +211,7 @@ Walk through the resume section by section, starting with the most recent role.
 
 After collecting all sections, show the complete draft and ask for explicit approval before writing.
 
-After approval (either path), write `Inputs/Resume.md`.
+After approval (either path), write `Inputs/resume.md`.
 
 ---
 
@@ -249,7 +249,7 @@ Show the draft and ask: "Here's a base cover letter draft. This will be customiz
 
 Iterate with the user until they approve.
 
-After approval (either path), write `Inputs/Cover Letter.md`.
+After approval (either path), write `Inputs/cover-letter.md`.
 
 ---
 
@@ -300,9 +300,9 @@ Confirm all files written during this session and tell the user exactly what to 
 > "Setup complete. Here's what was created:
 >
 > **Inputs/ files:**
-> - Inputs/Preferences.md
-> - Inputs/Resume.md
-> - Inputs/Cover Letter.md
+> - Inputs/preferences.md
+> - Inputs/resume.md
+> - Inputs/cover-letter.md
 >
 > **System files updated:**
 > - .claude/skills/generate-pdfs/cover-letter-header.html
