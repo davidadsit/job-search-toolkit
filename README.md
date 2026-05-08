@@ -12,10 +12,12 @@ Your base documents (resume, cover letter, preferences) live in `Inputs/` and ar
 
 - [Claude Code](https://claude.ai/claude-code)
 - [pandoc](https://pandoc.org/) with [weasyprint](https://weasyprint.org/) (for PDF generation)
+- [Node.js](https://nodejs.org/) (for JavaScript-rendered job sites)
 
 ```bash
-brew install pandoc
+brew install pandoc poppler
 pip install weasyprint pypdf
+cd Scripts && npm install && npx playwright install chromium
 ```
 
 ### 2. Create your personal repo
@@ -34,11 +36,12 @@ This skill walks you through the full setup interactively -- collecting your con
 
 ```
 Inputs/
-  Resume.md           # Your master resume
-  Cover Letter.md     # Your master cover letter
-  Preferences.md      # Your job search criteria
-  Experience Bank.md  # Created automatically by /customize-for-job
+  resume.md           # Your master resume
+  cover-letter.md     # Your master cover letter
+  preferences.md      # Your job search criteria
 ```
+
+`Inputs/experience-bank.md` is created automatically by `/customize-for-job` the first time it uncovers undocumented experience.
 
 It also updates `.claude/skills/generate-pdfs/cover-letter-header.html` and `Scripts/generate-base-docs.sh` with your name and contact info.
 
@@ -97,6 +100,7 @@ Generates styled resume and cover letter PDFs from an application folder. Report
 | File | Purpose |
 |------|---------|
 | `lead-tracker.md` | Full-funnel pipeline: Discovered > Researching > Applied > Interviewing > Offer > Closed |
+| `closed-leads-archive.md` | Past closures; used by `/find-jobs` and `/customize-for-job` for deduplication |
 
 ## Output per Application
 
@@ -121,12 +125,18 @@ Applications/CompanyName/
 |--------|---------|
 | `Scripts/generate-base-docs.sh` | Regenerates generic resume and cover letter PDFs in `Documents/` from `Inputs/` markdown |
 | `Scripts/generate-job-docs.sh <FolderName>` | Generates resume and cover letter PDFs for a specific application |
+| `Scripts/fetch-rendered.mjs` | Renders JavaScript-heavy job pages via headless Playwright; used as a fallback by `/find-jobs` and `/customize-for-job` when WebFetch returns empty results |
+| `Scripts/sync-skills.sh [toolkit-path]` | Pulls shared skills from the toolkit into your personal repo |
+| `Scripts/push-skills.sh [toolkit-path]` | Pushes shared skills and scripts from your personal repo back to the toolkit |
 
-Both scripts use pandoc with weasyprint and shared CSS from `.claude/skills/generate-pdfs/`.
+PDF generation scripts use pandoc with weasyprint and shared CSS from `.claude/skills/generate-pdfs/`.
+
+`sync-skills.sh` and `push-skills.sh` resolve the toolkit path from (in order): the script argument, `JOB_SEARCH_TOOLKIT` env var, a `.toolkit-path` file at repo root, or a default relative path of `../../code/job-search-toolkit`.
 
 ## Requirements
 
 - [Claude Code](https://claude.ai/claude-code)
 - [pandoc](https://pandoc.org/) with [weasyprint](https://weasyprint.org/) and [pypdf](https://pypdf.readthedocs.io/)
+- [Node.js](https://nodejs.org/) with [Playwright](https://playwright.dev/) (`cd Scripts && npm install && npx playwright install chromium`)
 
-PDF generation uses `mdls` for page count reporting, which requires macOS. The markdown-to-PDF conversion works on any platform. `pypdf` is used to strip pandoc/WeasyPrint metadata from generated PDFs to avoid ATS spam flags.
+Page count reporting uses `pdfinfo` from [poppler](https://poppler.freedesktop.org/) (`brew install poppler` on macOS). `pypdf` strips pandoc/WeasyPrint metadata from generated PDFs to avoid ATS spam flags. Playwright is used by `fetch-rendered.mjs` to render JavaScript-heavy job pages that WebFetch cannot access.
