@@ -43,6 +43,8 @@ Inputs/
 
 `Inputs/experience-bank.md` is created automatically by `/customize-for-job` the first time it uncovers undocumented experience.
 
+`Inputs/ats-targets.md` is optional, copy it from `ats-targets.template.md` or let `/find-jobs` create it on first use. It grows automatically as company ATS platforms are discovered.
+
 It also updates `.claude/skills/generate-pdfs/cover-letter-header.html` and `Scripts/generate-base-docs.sh` with your name and contact info.
 
 #### One manual step after setup
@@ -126,6 +128,7 @@ Applications/CompanyName/
 | `Scripts/generate-base-docs.sh` | Regenerates generic resume and cover letter PDFs in `Documents/` from `Inputs/` markdown |
 | `Scripts/generate-job-docs.sh <FolderName>` | Generates resume and cover letter PDFs for a specific application |
 | `Scripts/fetch-rendered.mjs` | Renders JavaScript-heavy job pages via headless Playwright; used as a fallback by `/find-jobs` and `/customize-for-job` when WebFetch returns empty results |
+| `Scripts/query-ats.mjs` | Queries Greenhouse/Ashby/Workable/Lever public APIs directly for a company's live job postings; used by `/find-jobs` Steps 2c/4.5 for zero-scraping freshness checks |
 | `Scripts/sync-skills.sh [toolkit-path]` | Pulls shared skills from the toolkit into your personal repo |
 | `Scripts/push-skills.sh [toolkit-path]` | Pushes shared skills and scripts from your personal repo back to the toolkit |
 

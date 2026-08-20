@@ -54,6 +54,9 @@ Run WebSearch queries across these sources. If a focus keyword was provided, app
 7. **Welcome to the Jungle:** `"VP of Engineering" OR "CTO" site:welcometothejungle.com`
 8. **General web:** `"VP of Engineering" OR "CTO" SaaS startup "Series A" OR "Series B" OR "Series C"`
 9. **Hacker News:** Search for the most recent "Ask HN: Who is hiring?" thread. If found, WebFetch the thread page and extract any comments mentioning your target titles at SaaS companies.
+10. **Silicon Slopes (regional):** WebFetch `https://jobs.siliconslopes.com/jobs/` and scan for target titles. Utah's tech community job board; update to your own region's equivalent community job board if not Utah-based.
+11. **Himalayas:** `"VP of Engineering" OR "CTO" site:himalayas.app` or WebFetch `https://himalayas.app/jobs/cto` and `https://himalayas.app/jobs/vp-of-engineering` directly. Remote-focused board; apply the usual industry exclusion filters, it surfaces some crypto/blockchain listings.
+12. **Recruiting from Scratch:** WebFetch `https://www.recruitingfromscratch.com/roles/cto`, `https://www.recruitingfromscratch.com/roles/vp-of-engineering`, and `https://www.recruitingfromscratch.com/roles/svp-of-engineering`. Technical recruiting firm with dedicated public listings for these titles at VC-backed startups.
 
 ### Step 2b: Search VC portfolio job boards
 
@@ -70,6 +73,8 @@ The examples below are Utah-focused; replace with VCs relevant to your metro are
 | Pelion Venture Partners | https://jobs.pelionvp.com/jobs | Seed/Series A B2B software, SLC-based |
 | Kickstart Fund | https://jobs.kickstart.com/jobs | Pre-seed/seed, Mountain West |
 | Peterson Ventures | https://jobs.petersonventures.com | Early-stage digital commerce + SaaS, SLC-based |
+| Album VC | https://jobs.albumvc.com/jobs (or WebSearch `site:albumvc.com` if no board found) | Seed/Series A, Lehi UT-based (Podium, Filevine, Divvy in portfolio) |
+| Sorenson Capital | https://www.sorensoncapital.com/portfolio (WebSearch `"CTO" OR "VP of Engineering" site:sorensoncapital.com` for linked postings) | Early/growth-stage B2B software, cybersecurity, DevOps, Lehi UT-based |
 
 **National VCs:**
 
@@ -88,6 +93,34 @@ The examples below are Utah-focused; replace with VCs relevant to your metro are
 - For boards without search: WebFetch the jobs page and scan for relevant titles.
 - For VCs with only a portfolio page (no job board): WebSearch `"CTO" OR "VP of Engineering" site:[vc-domain]` to find any linked job postings.
 - Note the source VC for each result so you know the company's investor backing.
+- **"Consider" platform boards (a16z, Accel, Bessemer, Sapphire, Pelion, and others use this vendor):** These boards actively block headless/non-browser traffic, both WebFetch and the Playwright CLI (`fetch-rendered.mjs`) typically fail (empty shell content, or the CLI errors with "Download is starting"). Do not spend WebFetch/CLI budget retrying the board URL directly. Instead go straight to the site-scoped WebSearch fallback (`"VP of Engineering" OR "CTO" site:jobs.[vc-domain]`), which reaches Google's index of individual job postings even though the board itself won't render.
+
+### Step 2c: Query ATS platforms directly
+
+Several major applicant tracking systems expose free, unauthenticated JSON APIs per company, no JS rendering, no bot-detection risk, and always current since it queries the live source. This is strictly better than WebSearch/WebFetch for any company hosted on one of these platforms, which covers a large share of Series A-C startups (confirmed working: Greenhouse, Ashby, Workable, Lever; Rippling's ATS does not appear to have an equivalent).
+
+If `Inputs/ats-targets.md` doesn't exist yet, copy it from `Inputs/ats-targets.template.md` first (or create it fresh with the same header row), the query script errors on a missing targets file.
+
+Run:
+```
+node Scripts/query-ats.mjs --targets Inputs/ats-targets.md --title-keywords "VP,CTO,Head of Engineering,SVP,Vice President,Senior Vice President"
+```
+
+This queries every company in `Inputs/ats-targets.md` in parallel and returns only postings whose title matches one of the keywords (word-boundary matched, not naive substring, so it won't false-positive on things like "Director" containing "cto").
+
+**Adding new companies to the target list:** Whenever a job posting URL from Step 2, 2b, or company research (`/customize-for-job`) reveals its ATS, the URL pattern gives away the platform:
+- Greenhouse: `job-boards.greenhouse.io/{slug}` or `boards.greenhouse.io/{slug}`
+- Ashby: `jobs.ashbyhq.com/{slug}`
+- Workable: `apply.workable.com` (company name is in the page, not always the URL, check the page title or use `--platform workable --company {guess}` to test)
+- Lever: `jobs.lever.co/{slug}`
+
+Add a row to `Inputs/ats-targets.md` with the company name, platform, slug, and a short note. This makes the target list grow organically over time, every company researched anywhere in this toolkit becomes a permanent, zero-cost freshness-check source for future runs. Companies that close, get acquired, or turn out to be a poor fit can stay in the list (their notes are useful context), Step 3's dedup against `lead-tracker.md` / `closed-leads-archive.md` handles filtering them back out if they resurface.
+
+**For a single company (e.g., verifying a lead found elsewhere is still live):**
+```
+node Scripts/query-ats.mjs --platform greenhouse --company medrio
+node Scripts/query-ats.mjs --platform ashby --company bankjoy --title-keywords "VP,Engineering"
+```
 
 ### Step 3: Filter and deduplicate
 
@@ -103,6 +136,19 @@ Score each result against the target profile in Preferences.md:
 - **Strong Match (3):** Title + stage + industry + location all align, or comp data confirms fit
 - **Good Match (2):** Most criteria align; one or two are unknown or slightly off
 - **Worth Investigating (1):** Title matches but other criteria are unknown or partially misaligned
+
+### Step 4.5: Verify freshness of shortlisted results
+
+Job board search results are frequently stale, postings get filled, pulled, or the company gets acquired, often well before a search engine's index catches up. Presenting dead leads wastes the user's evaluation time, so verify before presenting rather than after.
+
+Only check the results that survived Step 3/4 and would actually be shown to the user (typically 5-15 results), not every raw search hit. For each shortlisted result:
+
+1. **If the company is in `Inputs/ats-targets.md` (or its posting URL matches one of the ATS patterns from Step 2c):** re-query that single company's ATS API directly (`node Scripts/query-ats.mjs --platform {platform} --company {slug}`) rather than WebFetching the posting page. It's faster, cheaper, and definitive, if the job ID isn't in the response, it's closed. Add the company to `ats-targets.md` if it wasn't already there.
+2. **Otherwise:** WebFetch the direct posting URL (falling back to the Playwright CLI per the Web Request Strategy rules above if needed) and look for closure signals: "no longer accepting applications," "position filled," "job not found," "no longer open," "removed on [date]," an expired-listing notice, or a redirect to a generic careers/search page instead of the specific posting.
+3. If a quick company-name + role-title WebSearch surfaces an acquisition, shutdown, or leadership-change announcement that would make the posting moot (e.g., the company was acquired since the listing was indexed), treat it as closed even if the posting page itself still loads.
+4. **If closed or clearly stale:** drop it from the results presented to the user. Do not spend further evaluation effort on it. If it's dropped after already digging into details worth remembering (comp, reporting line, culture signals), note it briefly so the user isn't left wondering why it disappeared.
+5. **If freshness can't be determined either way:** keep it in the results but flag "posting freshness unconfirmed" in its notes.
+6. This adds roughly one extra WebFetch/WebSearch/ATS-query per shortlisted result, on top of the discovery-phase budget. It draws from the same ~20 WebSearch / ~10 WebFetch cap (ATS API queries are cheap and don't count against it meaningfully), so keep the shortlist reasonably sized rather than freshness-checking everything found.
 
 ### Step 5: Present results
 
@@ -138,6 +184,6 @@ If no results are found in a category, omit that section. If no results are foun
 - NEVER attempt authenticated access to LinkedIn or any other service.
 - NEVER use em dashes in any output.
 - Cap at ~20 WebSearch calls and ~10 WebFetch calls per run to stay responsive.
-- Honestly note limitations: some job boards render client-side and may not appear in search results; postings may be stale or already filled.
+- Honestly note limitations: some job boards render client-side and may not appear in search results. Shortlisted results should go through the Step 4.5 freshness check rather than being presented with an unverified "may be stale" caveat; if freshness genuinely could not be determined after attempting the check, say so explicitly for that specific result.
 - Include the posting date when available. Flag anything that appears older than 30 days.
 - If a search query returns no relevant results, note it and move on. Do not pad results.
