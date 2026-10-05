@@ -128,6 +128,7 @@ node Scripts/query-ats.mjs --platform ashby --company bankjoy --title-keywords "
 2. Remove any leads that already appear in `lead-tracker.md` or `closed-leads-archive.md` (past closures). Do not waste time researching or evaluating companies that have been previously discarded.
 3. Discard results that are clearly not executive/leadership engineering roles (e.g., "CTO" in a company name but role is an IC position).
 4. Flag but do not discard roles where stage, comp, or location are unknown.
+5. **Do not auto-discard a role just because it reports to a CTO/CPO/other technical executive instead of the CEO.** Per `Inputs/preferences.md`, this is a strong preference, not a hard filter. Keep it in the results (typically as "Worth Investigating" rather than "Strong Match" unless other signals are excellent) and flag explicitly that the reporting line and real authority need verification in a screening conversation, rather than closing it out on the posting text alone.
 
 ### Step 4: Rank results
 
